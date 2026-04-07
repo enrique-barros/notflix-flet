@@ -1,0 +1,62 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Entornos virtuales
+venv/
+.env/
+.venv/
+env/
+ENV/
+
+# Archivos de configuración de entorno
+.env
+.env.*
+
+# Distribución / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Logs
+*.log
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# IDEs / editores
+.vscode/
+.idea/
+
+# PyInstaller
+*.spec
+
+# Caché de pruebas
+.pytest_cache/
+
+# Caché de tipo
+.mypy_cache/
+
+# Coverage
+htmlcov/
+.coverage
+.coverage.*
+
+# Archivos temporales
+*.tmp
+*.bak
+*.swp
+
+# Flet específico (builds y assets generados)
+assets/build/
+assets/dist/
+
+# SQLite (si usas DB local)
+*.sqlite3
+
+# Archivos de sesión / runtime
+*.pid
+*.seed
