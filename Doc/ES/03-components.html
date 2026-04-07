@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Componentes — Notflix Docs</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <a href="index.html" class="brand">NOT<em>FLIX</em></a>
+  <a href="01-model.html">Datos</a>
+  <a href="02-theme.html">Config</a>
+  <a href="03-components.html" class="active">Componentes</a>
+  <a href="04-views.html">Vistas</a>
+  <a href="05-router.html">Router</a>
+  <a href="06-main.html">Main</a>
+</nav>
+
+<div class="shell">
+  <aside class="sidebar">
+    <div class="sidebar-label">Secciones</div>
+    <nav class="sidebar-nav">
+      <a href="01-model.html">① Modelo de datos</a>
+      <a href="02-theme.html">② Tema visual</a>
+      <a href="03-components.html" class="active">③ Componentes</a>
+      <a href="04-views.html">④ Vistas</a>
+      <a href="05-router.html">⑤ Router</a>
+      <a href="06-main.html">⑥ Main</a>
+    </nav>
+    <div class="sidebar-toc">
+      <div class="sidebar-toc-label">En esta página</div>
+      <a href="#s-card"   class="toc-link">movie_card.py</a>
+      <a href="#s-hero"   class="toc-link">hero_banner.py</a>
+      <a href="#s-logo"   class="toc-link">logo.py</a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="breadcrumb"><a href="index.html">Inicio</a><span>›</span>③ Componentes</div>
+
+    <div class="page-header">
+      <div class="step">③ componentes · components/</div>
+      <h1>Componentes visuales</h1>
+      <p>Piezas visuales reutilizables. Reciben datos por parámetro y devuelven un widget de Flet. No saben nada de navegación ni del estado global de la app.</p>
+    </div>
+
+    <div class="section" id="s-card">
+      <h2>movie_card.py</h2>
+      <div class="role-box"><strong>Para qué sirve:</strong> La tarjeta tipo póster que aparece en las filas del catálogo. Muestra un gradiente de fondo único por película, un ícono decorativo, y un overlay con el título y los metadatos.</div>
+
+      <h3>build_movie_card(movie, width)</h3>
+      <div class="code-block">
+        <div class="cb-header"><span>components/movie_card.py — build_movie_card()</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><span class="kw">def</span> <span class="fn">build_movie_card</span>(movie: Movie, width: <span class="py">float</span> = <span class="nu">180</span>) -> ft.Container:
+    height = width * <span class="nu">1.5</span>          <span class="cm"># ratio 2:3 tipo póster</span>
+    type_color = COLOR_PRIMARY <span class="kw">if</span> movie.type == <span class="st">"Movie"</span> <span class="kw">else</span> <span class="st">"#0070f3"</span>
+    grad_colors = <span class="fn">_poster_gradient</span>(movie.title)
+
+    poster = ft.<span class="fn">Container</span>(
+        width=width,
+        height=height,
+        border_radius=RADIUS_CARD,
+        gradient=ft.<span class="fn">LinearGradient</span>(
+            begin=ft.<span class="fn">Alignment</span>(<span class="nu">0</span>, <span class="nu">-1</span>),   <span class="cm"># arriba</span>
+            end=ft.<span class="fn">Alignment</span>(<span class="nu">0</span>, <span class="nu">1</span>),    <span class="cm"># abajo</span>
+            colors=grad_colors,
+        ),
+        content=ft.<span class="fn">Stack</span>(controls=[
+            <span class="cm"># 1. ícono decorativo de fondo</span>
+            ft.<span class="fn">Container</span>(
+                alignment=ft.<span class="fn">Alignment</span>(<span class="nu">0</span>, <span class="nu">-0.2</span>),
+                content=ft.<span class="fn">Icon</span>(ft.Icons.MOVIE_OUTLINED,
+                    color=ft.Colors.<span class="fn">with_opacity</span>(<span class="nu">0.25</span>, <span class="st">"white"</span>), size=<span class="nu">48</span>),
+            ),
+            <span class="cm"># 2. overlay inferior con gradiente negro + texto</span>
+            ft.<span class="fn">Container</span>(
+                alignment=ft.<span class="fn">Alignment</span>(<span class="nu">0</span>, <span class="nu">1</span>),
+                content=ft.<span class="fn">Container</span>(
+                    gradient=ft.<span class="fn">LinearGradient</span>(
+                        colors=[ft.Colors.<span class="fn">with_opacity</span>(<span class="nu">0</span>, <span class="st">"black"</span>),
+                                ft.Colors.<span class="fn">with_opacity</span>(<span class="nu">0.85</span>, <span class="st">"black"</span>)],
+                    ),
+                    content=ft.<span class="fn">Column</span>(controls=[
+                        <span class="cm"># badge, título, año·rating, géneros</span>
+                    ]),
+                ),
+            ),
+        ]),
+    )
+    <span class="kw">return</span> poster</pre>
+      </div>
+
+      <h3>¿Qué es ft.Stack?</h3>
+      <p>Un <code>Stack</code> apila sus hijos unos encima de otros, como capas. El primero queda abajo, el último arriba. Aquí se usa para poner el ícono decorativo detrás y el overlay con texto delante.</p>
+
+      <h3>El gradiente por hash</h3>
+      <div class="code-block">
+        <div class="cb-header"><span>components/movie_card.py — _poster_gradient()</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre>_POSTER_GRADIENTS = [
+    [<span class="st">"#0f0c29"</span>, <span class="st">"#302b63"</span>, <span class="st">"#24243e"</span>],
+    [<span class="st">"#1a1a2e"</span>, <span class="st">"#16213e"</span>, <span class="st">"#0f3460"</span>],
+    <span class="cm"># … 10 combinaciones más</span>
+]
+
+<span class="kw">def</span> <span class="fn">_poster_gradient</span>(title: <span class="py">str</span>) -> <span class="py">list</span>[<span class="py">str</span>]:
+    idx = <span class="fn">hash</span>(title) % <span class="fn">len</span>(_POSTER_GRADIENTS)
+    <span class="kw">return</span> _POSTER_GRADIENTS[idx]</pre>
+      </div>
+      <p><code>hash(title)</code> convierte el título en un número entero. El operador <code>%</code> (módulo) devuelve el resto de dividir ese número entre la cantidad de gradientes, garantizando un índice siempre válido. El mismo título siempre da el mismo hash, por eso cada película tiene siempre el mismo color.</p>
+      <p>El guión bajo en <code>_poster_gradient</code> es una convención de Python que indica que la función es privada: solo debe usarse dentro de este archivo.</p>
+    </div>
+
+    <div class="section" id="s-hero">
+      <h2>hero_banner.py</h2>
+      <div class="role-box"><strong>Para qué sirve:</strong> El banner grande de la parte superior del home. Muestra la película destacada con título, descripción, metadatos y dos botones de acción.</div>
+
+      <h3>build_hero_banner(movie, on_ver_detalle)</h3>
+      <div class="code-block">
+        <div class="cb-header"><span>components/hero_banner.py — build_hero_banner()</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><span class="kw">def</span> <span class="fn">build_hero_banner</span>(movie: Movie, on_ver_detalle) -> ft.Container:
+    desc = movie.description[:<span class="nu">160</span>] + <span class="st">"…"</span> <span class="kw">if</span> <span class="fn">len</span>(movie.description) > <span class="nu">160</span> <span class="kw">else</span> movie.description
+
+    btn_play = ft.<span class="fn">Container</span>(
+        bgcolor=COLOR_TEXT,
+        on_click=on_ver_detalle,   <span class="cm"># ← la callback</span>
+        ink=<span class="kw">True</span>,
+        content=ft.<span class="fn">Row</span>(controls=[
+            ft.<span class="fn">Icon</span>(ft.Icons.PLAY_ARROW_ROUNDED, color=<span class="st">"black"</span>),
+            ft.<span class="fn">Text</span>(<span class="st">"Reproducir"</span>, color=<span class="st">"black"</span>),
+        ]),
+    )
+    <span class="cm"># … btn_info igual pero con bgcolor semitransparente</span>
+
+    <span class="kw">return</span> ft.<span class="fn">Container</span>(
+        height=<span class="nu">320</span>,
+        gradient=ft.<span class="fn">LinearGradient</span>(colors=<span class="fn">_hero_gradient</span>(movie.title)),
+        content=ft.<span class="fn">Stack</span>(controls=[
+            <span class="cm"># ícono decorativo grande detrás</span>
+            <span class="cm"># contenido (título, pills, botones) delante</span>
+        ]),
+    )</pre>
+      </div>
+
+      <h3>¿Qué es una callback?</h3>
+      <p>El parámetro <code>on_ver_detalle</code> es una función que le pasa quien llama al componente. El banner no sabe cómo funciona la navegación — simplemente llama a esa función cuando el usuario pulsa un botón. Esto mantiene el componente desacoplado del resto de la app.</p>
+      <p>En <code>home_view.py</code>, quien llama al banner define esa función así:</p>
+      <div class="code-block">
+        <div class="cb-header"><span>home_view.py — cómo se pasa la callback</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><span class="kw">def</span> <span class="fn">ver_detalle</span>(e: ft.ControlEvent) -> <span class="kw">None</span>:
+    <span class="fn">navigate_to</span>(page, <span class="st">f"/detail/{featured.show_id}"</span>)
+
+<span class="fn">build_hero_banner</span>(featured, on_ver_detalle=ver_detalle)</pre>
+      </div>
+
+      <h3>ink=True</h3>
+      <p>Activa el efecto de onda (ripple) al pulsar el contenedor. Es el efecto visual que da feedback al usuario de que ha pulsado algo.</p>
+
+      <h3>Truncar la descripción</h3>
+      <p><code>movie.description[:160]</code> coge los primeros 160 caracteres. Si la descripción es más larga, añade "…". Es una forma concisa de hacer un truncado condicional en una sola línea.</p>
+    </div>
+
+    <div class="section" id="s-logo">
+      <h2>logo.py</h2>
+      <div class="role-box"><strong>Para qué sirve:</strong> Devuelve el texto "NOTFLIX" con el estilo de la marca. El componente más simple del proyecto.</div>
+
+      <div class="code-block">
+        <div class="cb-header"><span>components/logo.py</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><span class="kw">def</span> <span class="fn">build_logo</span>(texto: <span class="py">str</span> = <span class="st">"NotFlix"</span>) -> ft.Container:
+    logo = ft.<span class="fn">Text</span>(
+        texto.<span class="fn">upper</span>(),
+        size=FONT_SIZE_LOGO,
+        weight=ft.FontWeight.BOLD,
+        color=COLOR_PRIMARY,
+    )
+    <span class="kw">return</span> ft.<span class="fn">Container</span>(
+        bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
+        padding=PADDING_LOGO,
+        border_radius=RADIUS_CARD,
+        alignment=ft.Alignment.CENTER,
+        content=logo,
+    )</pre>
+      </div>
+      <p>El parámetro <code>texto</code> tiene un valor por defecto (<code>"NotFlix"</code>), así que se puede llamar sin argumentos: <code>build_logo()</code>. En esta versión del proyecto apenas se usa porque el logo del AppBar se define directamente en el router.</p>
+    </div>
+
+    <div class="page-nav">
+      <a href="02-theme.html"><div><span class="nav-label">← Anterior</span><span class="nav-title">theme.py</span></div></a>
+      <a href="04-views.html"><div><span class="nav-label">Siguiente →</span><span class="nav-title">Vistas</span></div></a>
+    </div>
+  </main>
+</div>
+
+<script>
+function copyCode(btn) {
+  const pre = btn.closest('.code-block').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(() => {
+    btn.textContent = '✓ Copiado'; btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copiar'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+(function () {
+  const links = document.querySelectorAll('.toc-link');
+  const sections = [...links].map(l => document.querySelector(l.getAttribute('href')));
+  function activate() {
+    let current = sections[0];
+    sections.forEach(s => { if (s && window.scrollY >= s.offsetTop - 84) current = s; });
+    links.forEach(l => l.classList.toggle('toc-active', l.getAttribute('href') === '#' + (current && current.id)));
+  }
+  window.addEventListener('scroll', activate, { passive: true }); activate();
+})();
+</script>
+</body>
+</html>

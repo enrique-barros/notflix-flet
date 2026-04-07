@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vistas — Notflix Docs</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <a href="index.html" class="brand">NOT<em>FLIX</em></a>
+  <a href="01-model.html">Datos</a>
+  <a href="02-theme.html">Config</a>
+  <a href="03-components.html">Componentes</a>
+  <a href="04-views.html" class="active">Vistas</a>
+  <a href="05-router.html">Router</a>
+  <a href="06-main.html">Main</a>
+</nav>
+
+<div class="shell">
+  <aside class="sidebar">
+    <div class="sidebar-label">Secciones</div>
+    <nav class="sidebar-nav">
+      <a href="01-model.html">① Modelo de datos</a>
+      <a href="02-theme.html">② Tema visual</a>
+      <a href="03-components.html">③ Componentes</a>
+      <a href="04-views.html" class="active">④ Vistas</a>
+      <a href="05-router.html">⑤ Router</a>
+      <a href="06-main.html">⑥ Main</a>
+    </nav>
+    <div class="sidebar-toc">
+      <div class="sidebar-toc-label">En esta página</div>
+      <a href="#s-profile" class="toc-link">profile_view.py</a>
+      <a href="#s-home"    class="toc-link">home_view.py</a>
+      <a href="#s-detail"  class="toc-link">detail_view.py</a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="breadcrumb"><a href="index.html">Inicio</a><span>›</span>④ Vistas</div>
+
+    <div class="page-header">
+      <div class="step">④ vistas · views/</div>
+      <h1>Vistas</h1>
+      <p>Las tres pantallas completas de la app. Cada vista devuelve un <code>ft.Column</code> con todo su contenido. No saben en qué ruta están — eso lo gestiona el router.</p>
+    </div>
+
+    <div class="section" id="s-profile">
+      <h2>profile_view.py — Selección de perfil</h2>
+      <div class="role-box"><strong>Para qué sirve:</strong> La pantalla inicial de "¿Quién está viendo?". Muestra cuatro avatares y al pulsar cualquiera navega al home.</div>
+
+      <h3>La lista PROFILES</h3>
+      <div class="code-block">
+        <div class="cb-header"><span>views/profile_view.py — datos de perfiles</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre>PROFILES = [
+    (<span class="st">"Ana"</span>,      <span class="st">"#E50914"</span>, ft.Icons.PERSON),
+    (<span class="st">"Carlos"</span>,   <span class="st">"#0070f3"</span>, ft.Icons.PERSON_2),
+    (<span class="st">"Marta"</span>,    <span class="st">"#7928ca"</span>, ft.Icons.PERSON_3),
+    (<span class="st">"Invitado"</span>, <span class="st">"#444444"</span>, ft.Icons.PERSON_OUTLINE),
+]</pre>
+      </div>
+      <p>Es una lista de tuplas. Cada tupla tiene tres elementos: nombre, color hexadecimal e ícono de Flet. Se recorre con un bucle para crear los avatares.</p>
+
+      <h3>build_profile_view(page)</h3>
+      <div class="code-block">
+        <div class="cb-header"><span>views/profile_view.py — build_profile_view()</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><span class="kw">def</span> <span class="fn">build_profile_view</span>(page: ft.Page) -> ft.Column:
+    <span class="kw">from</span> router <span class="kw">import</span> navigate_to   <span class="cm"># import dentro de la función</span>
+
+    <span class="kw">def</span> <span class="fn">select_profile</span>(e: ft.ControlEvent) -> <span class="kw">None</span>:
+        <span class="fn">navigate_to</span>(page, <span class="st">"/home"</span>)
+
+    profile_row = ft.<span class="fn">Row</span>(
+        wrap=<span class="kw">True</span>,
+        alignment=ft.MainAxisAlignment.CENTER,
+        controls=[
+            <span class="fn">_avatar</span>(name, color, icon, on_click=select_profile)
+            <span class="kw">for</span> name, color, icon <span class="kw">in</span> PROFILES   <span class="cm"># list comprehension</span>
+        ],
+    )
+
+    <span class="kw">return</span> ft.<span class="fn">Column</span>(
+        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+        alignment=ft.MainAxisAlignment.CENTER,
+        expand=<span class="kw">True</span>,
+        controls=[
+            ft.<span class="fn">Text</span>(<span class="st">"NOTFLIX"</span>, size=<span class="nu">56</span>, color=COLOR_PRIMARY),
+            ft.<span class="fn">Text</span>(<span class="st">"¿Quién está viendo?"</span>, size=<span class="nu">24</span>),
+            ft.<span class="fn">Container</span>(height=<span class="nu">48</span>),  <span class="cm"># espaciador</span>
+            profile_row,
+        ],
+    )</pre>
+      </div>
+
+      <div class="callout"><strong>¿Por qué el import está dentro de la función?</strong> Para evitar importaciones circulares. Si <code>profile_view</code> importara <code>router</code> al nivel superior, y <code>router</code> importara <code>profile_view</code>, Python entraría en un bucle infinito al cargar los módulos. Poner el import dentro de la función lo retrasa hasta el momento en que se necesita, cuando ambos módulos ya están cargados.</div>
+
+      <h3>List comprehension</h3>
+      <p><code>[_avatar(name, color, icon, ...) for name, color, icon in PROFILES]</code> es una forma concisa de crear una lista. Equivale a un bucle <code>for</code> que añade cada elemento. El <code>for name, color, icon in PROFILES</code> desempaqueta cada tupla en tres variables.</p>
+
+      <h3>_avatar(name, color, icon, on_click)</h3>
+      <div class="code-block">
+        <div class="cb-header"><span>views/profile_view.py — _avatar()</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><span class="kw">def</span> <span class="fn">_avatar</span>(name, color, icon, on_click) -> ft.Column:
+    <span class="kw">return</span> ft.<span class="fn">Column</span>(
+        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+        controls=[
+            ft.<span class="fn">Container</span>(
+                width=<span class="nu">100</span>, height=<span class="nu">100</span>,
+                border_radius=ft.<span class="fn">BorderRadius</span>(<span class="nu">8</span>,<span class="nu">8</span>,<span class="nu">8</span>,<span class="nu">8</span>),
+                bgcolor=color,
+                on_click=on_click,
+                ink=<span class="kw">True</span>,
+                content=ft.<span class="fn">Icon</span>(icon, color=<span class="st">"white"</span>, size=<span class="nu">44</span>),
+            ),
+            ft.<span class="fn">Text</span>(name, size=<span class="nu">15</span>),
+        ],
+    )</pre>
+      </div>
+    </div>
+
+    <div class="section" id="s-home">
+      <h2>home_view.py — Catálogo principal</h2>
+      <div class="role-box"><strong>Para qué sirve:</strong> La pantalla principal. Muestra el banner destacado, el buscador y las filas del catálogo. Es la vista más compleja porque tiene estado interno.</div>
+
+      <h3>build_home_view(page)</h3>
+      <div class="code-block">
+        <div class="cb-header"><span>views/home_view.py — estructura general</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><span class="kw">def</span> <span class="fn">build_home_view</span>(page: ft.Page) -> ft.Column:
+    all_movies  = <span class="fn">load_movies</span>()
+    movies_only = [m <span class="kw">for</span> m <span class="kw">in</span> all_movies <span class="kw">if</span> m.type == <span class="st">"Movie"</span>]
+    shows_only  = [m <span class="kw">for</span> m <span class="kw">in</span> all_movies <span class="kw">if</span> m.type == <span class="st">"TV Show"</span>]
+    featured    = random.<span class="fn">choice</span>(movies_only[:<span class="nu">50</span>])  <span class="cm"># película aleatoria</span>
+
+    <span class="cm"># dos secciones que se alternan:</span>
+    catalog_section = ...  <span class="cm"># filas del catálogo (visible por defecto)</span>
+    search_section  = ...  <span class="cm"># resultados de búsqueda (oculto por defecto)</span>
+
+    <span class="kw">return</span> ft.<span class="fn">Column</span>(
+        scroll=ft.ScrollMode.AUTO,
+        controls=[
+            <span class="fn">build_hero_banner</span>(featured, on_ver_detalle=ver_detalle),
+            search_bar,
+            search_section,
+            catalog_section,
+        ],
+    )</pre>
+      </div>
+
+      <h3>El buscador — on_search()</h3>
+      <div class="code-block">
+        <div class="cb-header"><span>views/home_view.py — función de búsqueda</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><span class="kw">def</span> <span class="fn">on_search</span>(e: ft.ControlEvent) -> <span class="kw">None</span>:
+    query = e.control.value.<span class="fn">strip</span>().<span class="fn">lower</span>()
+
+    <span class="kw">if not</span> query:
+        catalog_section.visible = <span class="kw">True</span>   <span class="cm"># vuelve al catálogo</span>
+        search_section.visible  = <span class="kw">False</span>
+        results_grid.controls.<span class="fn">clear</span>()
+        page.<span class="fn">update</span>()
+        <span class="kw">return</span>
+
+    found = [
+        m <span class="kw">for</span> m <span class="kw">in</span> all_movies
+        <span class="kw">if</span> query <span class="kw">in</span> m.title.<span class="fn">lower</span>()
+        <span class="kw">or</span> query <span class="kw">in</span> m.listed_in.<span class="fn">lower</span>()
+        <span class="kw">or</span> query <span class="kw">in</span> m.director.<span class="fn">lower</span>()
+    ][:<span class="nu">40</span>]   <span class="cm"># máximo 40 resultados</span>
+
+    results_grid.controls   = [<span class="fn">_clickable_card</span>(m, page) <span class="kw">for</span> m <span class="kw">in</span> found]
+    no_results.visible      = <span class="fn">len</span>(found) == <span class="nu">0</span>
+    catalog_section.visible = <span class="kw">False</span>
+    search_section.visible  = <span class="kw">True</span>
+    page.<span class="fn">update</span>()    <span class="cm"># refresca la pantalla</span>
+
+search_bar = ft.<span class="fn">TextField</span>(
+    hint_text=<span class="st">"Buscar títulos, géneros, directores…"</span>,
+    on_change=on_search,   <span class="cm"># se llama en cada tecla</span>
+)</pre>
+      </div>
+
+      <p><code>on_change</code> dispara la función cada vez que el usuario escribe una tecla. La búsqueda es en tiempo real, sin botón de confirmar. <code>page.update()</code> es necesario para que Flet redibuje los widgets que han cambiado.</p>
+      <p>La búsqueda convierte todo a minúsculas con <code>.lower()</code> para que "drama", "Drama" y "DRAMA" den el mismo resultado.</p>
+
+      <h3>_clickable_card() — separar responsabilidades</h3>
+      <div class="code-block">
+        <div class="cb-header"><span>views/home_view.py — tarjeta con navegación</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><span class="kw">def</span> <span class="fn">_clickable_card</span>(movie: Movie, page: ft.Page) -> ft.GestureDetector:
+    <span class="kw">from</span> router <span class="kw">import</span> navigate_to
+    <span class="kw">return</span> ft.<span class="fn">GestureDetector</span>(
+        mouse_cursor=ft.MouseCursor.CLICK,
+        on_tap=<span class="kw">lambda</span> _: <span class="fn">navigate_to</span>(page, <span class="st">f"/detail/{movie.show_id}"</span>),
+        content=<span class="fn">build_movie_card</span>(movie, width=<span class="nu">160</span>),
+    )</pre>
+      </div>
+      <p><code>build_movie_card</code> no sabe nada de navegación. <code>_clickable_card</code> la envuelve en un <code>GestureDetector</code> que sí sabe. Así el componente visual y la lógica de navegación están separados.</p>
+      <p>La <code>lambda</code> es una función anónima de una sola línea. <code>lambda _: navigate_to(...)</code> ignora el evento (<code>_</code>) y simplemente llama a <code>navigate_to</code>.</p>
+    </div>
+
+    <div class="section" id="s-detail">
+      <h2>detail_view.py — Ficha completa</h2>
+      <div class="role-box"><strong>Para qué sirve:</strong> La pantalla de detalle de un título. Muestra el póster simulado, los metadatos, la sinopsis y el reparto completo.</div>
+
+      <h3>build_detail_view(movie, page)</h3>
+      <div class="code-block">
+        <div class="cb-header"><span>views/detail_view.py — estructura</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><span class="kw">def</span> <span class="fn">build_detail_view</span>(movie: Movie, page: ft.Page) -> ft.Column:
+    <span class="kw">from</span> router <span class="kw">import</span> navigate_to
+
+    <span class="cm"># póster simulado con gradiente por hash del título</span>
+    poster = ft.<span class="fn">Container</span>(
+        width=<span class="nu">130</span>, height=<span class="nu">195</span>,
+        gradient=ft.<span class="fn">LinearGradient</span>(colors=<span class="fn">_grad</span>(movie.title)),
+        content=ft.<span class="fn">Icon</span>(ft.Icons.MOVIE_ROUNDED,
+            color=ft.Colors.<span class="fn">with_opacity</span>(<span class="nu">0.2</span>, <span class="st">"white"</span>), size=<span class="nu">60</span>),
+    )
+
+    back_btn = ft.<span class="fn">Container</span>(
+        on_click=<span class="kw">lambda</span> _: <span class="fn">navigate_to</span>(page, <span class="st">"/home"</span>),
+        content=ft.<span class="fn">Row</span>(controls=[
+            ft.<span class="fn">Icon</span>(ft.Icons.ARROW_BACK_IOS_NEW_ROUNDED, color=COLOR_PRIMARY),
+            ft.<span class="fn">Text</span>(<span class="st">"Volver al catálogo"</span>, color=COLOR_PRIMARY),
+        ]),
+    )
+
+    <span class="kw">return</span> ft.<span class="fn">Column</span>(
+        expand=<span class="kw">True</span>,
+        scroll=ft.ScrollMode.AUTO,
+        controls=[back_btn, header, divider, synopsis, divider, metadata, divider, cast_col],
+    )</pre>
+      </div>
+
+      <h3>_info_row() — filas de metadatos</h3>
+      <div class="code-block">
+        <div class="cb-header"><span>views/detail_view.py — _info_row()</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><span class="kw">def</span> <span class="fn">_info_row</span>(label: <span class="py">str</span>, value: <span class="py">str</span>) -> ft.Row:
+    <span class="kw">return</span> ft.<span class="fn">Row</span>(
+        spacing=<span class="nu">10</span>,
+        controls=[
+            ft.<span class="fn">Text</span>(label, size=<span class="nu">13</span>, color=COLOR_SUBTEXT, width=<span class="nu">90</span>),
+            ft.<span class="fn">Text</span>(value <span class="kw">or</span> <span class="st">"—"</span>, size=<span class="nu">13</span>, color=COLOR_TEXT, expand=<span class="kw">True</span>),
+        ],
+    )</pre>
+      </div>
+      <p><code>value or "—"</code> es una expresión Python: si <code>value</code> es una cadena vacía (que es falsy), devuelve <code>"—"</code>. Evita mostrar campos vacíos en la interfaz.</p>
+      <p>El parámetro <code>width=90</code> en la etiqueta fija su ancho para que todos los valores queden alineados en la misma columna.</p>
+
+      <h3>El reparto</h3>
+      <div class="code-block">
+        <div class="cb-header"><span>views/detail_view.py — lista de reparto</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><span class="kw">if</span> movie.cast:
+    <span class="kw">for</span> name <span class="kw">in</span> [c.<span class="fn">strip</span>() <span class="kw">for</span> c <span class="kw">in</span> movie.cast.<span class="fn">split</span>(<span class="st">","</span>)][:<span class="nu">8</span>]:
+        cast_col.controls.<span class="fn">append</span>(ft.<span class="fn">Row</span>(controls=[
+            ft.<span class="fn">Icon</span>(ft.Icons.PERSON_OUTLINE, color=COLOR_SUBTEXT, size=<span class="nu">14</span>),
+            ft.<span class="fn">Text</span>(name, size=<span class="nu">13</span>),
+        ]))</pre>
+      </div>
+      <p>El CSV guarda el reparto como <code>"Actor Uno, Actor Dos, Actor Tres"</code>. Se parte por coma, se limpian los espacios con <code>.strip()</code>, y se cogen solo los primeros 8 con <code>[:8]</code>. El <code>if movie.cast:</code> evita errores si el campo está vacío.</p>
+    </div>
+
+    <div class="page-nav">
+      <a href="03-components.html"><div><span class="nav-label">← Anterior</span><span class="nav-title">Componentes</span></div></a>
+      <a href="05-router.html"><div><span class="nav-label">Siguiente →</span><span class="nav-title">router.py</span></div></a>
+    </div>
+  </main>
+</div>
+
+<script>
+function copyCode(btn) {
+  const pre = btn.closest('.code-block').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(() => {
+    btn.textContent = '✓ Copiado'; btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copiar'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+(function () {
+  const links = document.querySelectorAll('.toc-link');
+  const sections = [...links].map(l => document.querySelector(l.getAttribute('href')));
+  function activate() {
+    let current = sections[0];
+    sections.forEach(s => { if (s && window.scrollY >= s.offsetTop - 84) current = s; });
+    links.forEach(l => l.classList.toggle('toc-active', l.getAttribute('href') === '#' + (current && current.id)));
+  }
+  window.addEventListener('scroll', activate, { passive: true }); activate();
+})();
+</script>
+</body>
+</html>

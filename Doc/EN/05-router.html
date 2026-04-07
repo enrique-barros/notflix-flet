@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>router.py — Notflix Docs</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <a href="index.html" class="brand">NOT<em>FLIX</em></a>
+  <a href="01-model.html">Data</a>
+  <a href="02-theme.html">Config</a>
+  <a href="03-components.html">Components</a>
+  <a href="04-views.html">Views</a>
+  <a href="05-router.html" class="active">Router</a>
+  <a href="06-main.html">Main</a>
+</nav>
+
+<div class="shell">
+  <aside class="sidebar">
+    <div class="sidebar-label">Sections</div>
+    <nav class="sidebar-nav">
+      <a href="01-model.html">① Data model</a>
+      <a href="02-theme.html">② Visual theme</a>
+      <a href="03-components.html">③ Components</a>
+      <a href="04-views.html">④ Views</a>
+      <a href="05-router.html" class="active">⑤ Router</a>
+      <a href="06-main.html">⑥ Main</a>
+    </nav>
+    <div class="sidebar-toc">
+      <div class="sidebar-toc-label">On this page</div>
+      <a href="#s-nav"      class="toc-link">Navigation in Flet</a>
+      <a href="#s-index"    class="toc-link">_MOVIE_INDEX</a>
+      <a href="#s-navigate" class="toc-link">navigate_to()</a>
+      <a href="#s-views"    class="toc-link">View builder functions</a>
+      <a href="#s-setup"    class="toc-link">setup_router()</a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="breadcrumb"><a href="index.html">Home</a><span>›</span>⑤ Router</div>
+
+    <div class="page-header">
+      <div class="step">⑤ router · router.py</div>
+      <h1>Router</h1>
+      <p>The brain of navigation. Controls which screen is shown and manages history. It's the file that connects all the views.</p>
+    </div>
+
+    <div class="section" id="s-nav">
+      <h2>How navigation works in Flet</h2>
+      <p>Flet doesn't use real URLs like a browser. Instead, it maintains a <strong>View stack</strong>. Think of it like a stack of cards: the card on top is what the user sees. When you navigate forward, a card is added on top. When you press back, the top card is removed.</p>
+      <div class="code-block">
+        <div class="cb-header"><span>how the View stack works</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><span class="cm"># On the start screen:</span>
+page.views = [profile_view]    <span class="cm"># user sees profile</span>
+
+<span class="cm"># Navigating to home:</span>
+page.views = [profile_view, home_view]    <span class="cm"># user sees home</span>
+
+<span class="cm"># Viewing a detail:</span>
+page.views = [profile_view, home_view, detail_view]    <span class="cm"># user sees detail</span>
+
+<span class="cm"># Pressing back:</span>
+page.views.pop()    <span class="cm"># removes detail → user sees home</span></pre>
+      </div>
+      <p>The base is always <code>profile_view</code>. Even if the user never goes back to it by clicking, it remains in the stack in case they press the physical back button multiple times.</p>
+    </div>
+
+    <div class="section" id="s-index">
+      <h2>The movie index — _MOVIE_INDEX</h2>
+      <div class="code-block">
+        <div class="cb-header"><span>router.py — movie index</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre>_MOVIE_INDEX: <span class="py">dict</span>[<span class="py">str</span>, Movie] = {m.show_id: m <span class="kw">for</span> m <span class="kw">in</span> <span class="fn">load_movies</span>()}</pre>
+      </div>
+      <p>A dictionary that maps <code>show_id → Movie</code>. It's built once when the module is imported, using a dict comprehension (same as list comprehension but creates a dictionary).</p>
+      <p>When the route is <code>/detail/s123</code>, <code>s123</code> is extracted and <code>_MOVIE_INDEX.get("s123")</code> is called. Looking up a dictionary is instant regardless of how many movies there are — much more efficient than scanning an entire list.</p>
+    </div>
+
+    <div class="section" id="s-navigate">
+      <h2>navigate_to() — the key function</h2>
+      <div class="code-block">
+        <div class="cb-header"><span>router.py — navigate_to()</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><span class="kw">def</span> <span class="fn">navigate_to</span>(page: ft.Page, route: <span class="py">str</span>) -> <span class="kw">None</span>:
+    page.views.<span class="fn">clear</span>()                     <span class="cm"># clear the entire stack</span>
+    page.views.<span class="fn">append</span>(<span class="fn">_view_profiles</span>(page))  <span class="cm"># always the base</span>
+
+    <span class="kw">if</span> route == <span class="st">"/home"</span>:
+        page.views.<span class="fn">append</span>(<span class="fn">_view_home</span>(page))
+
+    <span class="kw">elif</span> route.<span class="fn">startswith</span>(<span class="st">"/detail/"</span>):
+        show_id = route.<span class="fn">split</span>(<span class="st">"/detail/"</span>, <span class="nu">1</span>)[-<span class="nu">1</span>]   <span class="cm"># extract "s123"</span>
+        page.views.<span class="fn">append</span>(<span class="fn">_view_home</span>(page))
+        page.views.<span class="fn">append</span>(<span class="fn">_view_detail</span>(page, show_id))
+
+    page.<span class="fn">update</span>()   <span class="cm"># redraw</span></pre>
+      </div>
+
+      <h3>Why clear and rebuild instead of just appending?</h3>
+      <p>If you only appended, the stack would grow infinitely as the user navigates between screens. Clearing and rebuilding ensures the stack always has exactly the right depth for the current route.</p>
+
+      <h3>Extracting the show_id from the route</h3>
+      <p><code>route.split("/detail/", 1)</code> splits the string <code>"/detail/s123"</code> into at most 2 parts: <code>["", "s123"]</code>. The <code>[-1]</code> takes the last element, which is the ID. The <code>1</code> limits the splits to avoid breaking IDs that might contain the text "/detail/".</p>
+    </div>
+
+    <div class="section" id="s-views">
+      <h2>View builder functions</h2>
+      <p>Each screen is wrapped in a <code>ft.View</code>, which is Flet's unit of a screen. This is where the route, background color, and optionally the AppBar are defined.</p>
+      <div class="code-block">
+        <div class="cb-header"><span>router.py — _view_home()</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><span class="kw">def</span> <span class="fn">_view_home</span>(page: ft.Page) -> ft.View:
+    <span class="kw">return</span> ft.<span class="fn">View</span>(
+        route=<span class="st">"/home"</span>,
+        bgcolor=COLOR_BG,
+        appbar=ft.<span class="fn">AppBar</span>(
+            title=ft.<span class="fn">Text</span>(<span class="st">"NOTFLIX"</span>, color=<span class="st">"#E50914"</span>, weight=ft.FontWeight.BOLD),
+            bgcolor=<span class="st">"#0a0a0a"</span>,
+            automatically_imply_leading=<span class="kw">False</span>,  <span class="cm"># no automatic back button</span>
+        ),
+        controls=[
+            ft.<span class="fn">Container</span>(
+                expand=<span class="kw">True</span>,
+                padding=ft.<span class="fn">Padding</span>(<span class="nu">16</span>, <span class="nu">0</span>, <span class="nu">16</span>, <span class="nu">16</span>),
+                content=ft.<span class="fn">SafeArea</span>(expand=<span class="kw">True</span>, content=<span class="fn">build_home_view</span>(page)),
+            )
+        ],
+    )</pre>
+      </div>
+      <p><code>automatically_imply_leading=False</code> disables the back arrow that Flet would automatically add to the AppBar when there's more than one view in the stack. On the home screen, that button is not wanted.</p>
+      <p><code>ft.SafeArea</code> adds automatic padding to prevent content from being hidden by notches, cameras, or system bars on mobile.</p>
+    </div>
+
+    <div class="section" id="s-setup">
+      <h2>setup_router() — the startup</h2>
+      <div class="code-block">
+        <div class="cb-header"><span>router.py — setup_router()</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><span class="kw">def</span> <span class="fn">setup_router</span>(page: ft.Page) -> <span class="kw">None</span>:
+    <span class="kw">def</span> <span class="fn">view_pop</span>(e: ft.ViewPopEvent) -> <span class="kw">None</span>:
+        <span class="kw">if</span> <span class="fn">len</span>(page.views) > <span class="nu">1</span>:
+            page.views.<span class="fn">pop</span>()   <span class="cm"># remove the last view</span>
+            page.<span class="fn">update</span>()
+
+    page.on_view_pop = view_pop    <span class="cm"># physical back button</span>
+    <span class="fn">navigate_to</span>(page, <span class="st">"/"</span>)         <span class="cm"># initial screen</span></pre>
+      </div>
+      <p><code>page.on_view_pop</code> is the event Flet fires when the user presses the physical back button (on Android) or the back gesture. The <code>view_pop</code> function removes the last view from the stack. The <code>len > 1</code> check prevents removing the base view and ending up with an empty stack.</p>
+      <p>This function is called once from <code>main.py</code> when the app starts.</p>
+    </div>
+
+    <div class="page-nav">
+      <a href="04-views.html"><div><span class="nav-label">← Previous</span><span class="nav-title">Views</span></div></a>
+      <a href="06-main.html"><div><span class="nav-label">Next →</span><span class="nav-title">main.py</span></div></a>
+    </div>
+  </main>
+</div>
+
+<script>
+function copyCode(btn) {
+  const pre = btn.closest('.code-block').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(() => {
+    btn.textContent = '✓ Copied'; btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+(function () {
+  const links = document.querySelectorAll('.toc-link');
+  const sections = [...links].map(l => document.querySelector(l.getAttribute('href')));
+  function activate() {
+    let current = sections[0];
+    sections.forEach(s => { if (s && window.scrollY >= s.offsetTop - 84) current = s; });
+    links.forEach(l => l.classList.toggle('toc-active', l.getAttribute('href') === '#' + (current && current.id)));
+  }
+  window.addEventListener('scroll', activate, { passive: true }); activate();
+})();
+</script>
+</body>
+</html>

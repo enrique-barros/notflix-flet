@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>theme.py — Notflix Docs</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <a href="index.html" class="brand">NOT<em>FLIX</em></a>
+  <a href="01-model.html">Datos</a>
+  <a href="02-theme.html" class="active">Config</a>
+  <a href="03-components.html">Componentes</a>
+  <a href="04-views.html">Vistas</a>
+  <a href="05-router.html">Router</a>
+  <a href="06-main.html">Main</a>
+</nav>
+
+<div class="shell">
+  <aside class="sidebar">
+    <div class="sidebar-label">Secciones</div>
+    <nav class="sidebar-nav">
+      <a href="01-model.html">① Modelo de datos</a>
+      <a href="02-theme.html" class="active">② Tema visual</a>
+      <a href="03-components.html">③ Componentes</a>
+      <a href="04-views.html">④ Vistas</a>
+      <a href="05-router.html">⑤ Router</a>
+      <a href="06-main.html">⑥ Main</a>
+    </nav>
+    <div class="sidebar-toc">
+      <div class="sidebar-toc-label">En esta página</div>
+      <a href="#s-why"    class="toc-link">Por qué existe</a>
+      <a href="#s-code"   class="toc-link">El código</a>
+      <a href="#s-how"    class="toc-link">Cómo se usa</a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="breadcrumb"><a href="index.html">Inicio</a><span>›</span>② Config</div>
+
+    <div class="page-header">
+      <div class="step">② config · config/theme.py</div>
+      <h1>Tema visual</h1>
+      <p>Un único lugar donde viven todos los valores visuales de la app. Colores, tamaños de fuente, espaciados y radios de borde.</p>
+    </div>
+
+    <div class="section" id="s-why">
+      <h2>Por qué existe este archivo</h2>
+      <p>Sin este archivo, cada componente usaría sus propios valores hardcodeados: <code>"#E50914"</code> en diez sitios distintos, <code>14</code> como tamaño de fuente en otros cinco. Si quisieras cambiar el rojo de Netflix, tendrías que buscar y reemplazar en cada archivo.</p>
+      <p>Con <code>theme.py</code>, cambias un valor aquí y se actualiza en toda la app automáticamente. Todos los demás archivos importan de aquí.</p>
+    </div>
+
+    <div class="section" id="s-code">
+      <h2>El código completo</h2>
+      <div class="code-block">
+        <div class="cb-header"><span>config/theme.py</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><span class="kw">import</span> flet <span class="kw">as</span> ft
+
+<span class="cm"># ── Paleta de colores ────────────────────────────</span>
+COLOR_PRIMARY  = <span class="st">"#E50914"</span>   <span class="cm"># rojo Netflix</span>
+COLOR_BG       = <span class="st">"#141414"</span>   <span class="cm"># negro de fondo</span>
+COLOR_SURFACE  = <span class="st">"#1F1F1F"</span>   <span class="cm"># superficie de cards</span>
+COLOR_SURFACE2 = <span class="st">"#2A2A2A"</span>   <span class="cm"># superficie elevada</span>
+COLOR_TEXT     = <span class="st">"#FFFFFF"</span>
+COLOR_SUBTEXT  = <span class="st">"#A3A3A3"</span>   <span class="cm"># texto secundario / apagado</span>
+
+COLOR_BADGE_BG = ft.Colors.<span class="fn">with_opacity</span>(<span class="nu">0.18</span>, ft.Colors.WHITE)
+COLOR_CARD_BG  = <span class="st">"#1F1F1F"</span>
+
+<span class="cm"># ── Tipografía ───────────────────────────────────</span>
+FONT_SIZE_LOGO       = <span class="nu">48</span>
+FONT_SIZE_SUBTITLE   = <span class="nu">18</span>
+FONT_SIZE_BODY       = <span class="nu">14</span>
+FONT_SIZE_BADGE      = <span class="nu">11</span>
+FONT_SIZE_CARD_TITLE = <span class="nu">13</span>
+FONT_SIZE_CARD_META  = <span class="nu">11</span>
+
+<span class="cm"># ── Espaciado ────────────────────────────────────</span>
+PADDING_CARD  = ft.<span class="fn">Padding</span>(<span class="nu">10</span>, <span class="nu">10</span>, <span class="nu">10</span>, <span class="nu">10</span>)
+PADDING_BADGE = ft.<span class="fn">Padding</span>(<span class="nu">10</span>, <span class="nu">5</span>, <span class="nu">10</span>, <span class="nu">5</span>)
+
+<span class="cm"># ── Radios de borde ──────────────────────────────</span>
+RADIUS_CARD  = ft.<span class="fn">BorderRadius</span>(<span class="nu">6</span>, <span class="nu">6</span>, <span class="nu">6</span>, <span class="nu">6</span>)
+RADIUS_BADGE = ft.<span class="fn">BorderRadius</span>(<span class="nu">4</span>, <span class="nu">4</span>, <span class="nu">4</span>, <span class="nu">4</span>)</pre>
+      </div>
+    </div>
+
+    <div class="section" id="s-how">
+      <h2>Cómo se usa en el resto del proyecto</h2>
+      <p>Cualquier archivo que necesite un valor visual lo importa directamente:</p>
+      <div class="code-block">
+        <div class="cb-header"><span>ejemplo — cualquier archivo del proyecto</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><span class="kw">from</span> config.theme <span class="kw">import</span> COLOR_BG, COLOR_TEXT, RADIUS_CARD
+
+<span class="cm"># en vez de escribir "#141414" a mano:</span>
+container = ft.<span class="fn">Container</span>(bgcolor=COLOR_BG)</pre>
+      </div>
+
+      <h3>ft.Colors.with_opacity()</h3>
+      <p>Flet tiene su propio sistema para colores con transparencia. <code>ft.Colors.with_opacity(0.18, ft.Colors.WHITE)</code> crea blanco al 18% de opacidad. Se usa para fondos de badges y overlays semitransparentes.</p>
+
+      <h3>ft.Padding() y ft.BorderRadius()</h3>
+      <p>Ambos reciben cuatro valores: <code>(izquierda, arriba, derecha, abajo)</code> para Padding, y <code>(superior_izq, superior_der, inferior_der, inferior_izq)</code> para BorderRadius. En este proyecto todos los radios son iguales en las cuatro esquinas, dando bordes uniformemente redondeados.</p>
+    </div>
+
+    <div class="page-nav">
+      <a href="01-model.html"><div><span class="nav-label">← Anterior</span><span class="nav-title">movie_model.py</span></div></a>
+      <a href="03-components.html"><div><span class="nav-label">Siguiente →</span><span class="nav-title">Componentes</span></div></a>
+    </div>
+  </main>
+</div>
+
+<script>
+function copyCode(btn) {
+  const pre = btn.closest('.code-block').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(() => {
+    btn.textContent = '✓ Copiado'; btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copiar'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+(function () {
+  const links = document.querySelectorAll('.toc-link');
+  const sections = [...links].map(l => document.querySelector(l.getAttribute('href')));
+  function activate() {
+    const navH = 52;
+    let current = sections[0];
+    sections.forEach(s => { if (s && window.scrollY >= s.offsetTop - navH - 32) current = s; });
+    links.forEach(l => l.classList.toggle('toc-active', l.getAttribute('href') === '#' + (current && current.id)));
+  }
+  window.addEventListener('scroll', activate, { passive: true }); activate();
+})();
+</script>
+</body>
+</html>

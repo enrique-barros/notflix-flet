@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>router.py — Notflix Docs</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <a href="index.html" class="brand">NOT<em>FLIX</em></a>
+  <a href="01-model.html">Datos</a>
+  <a href="02-theme.html">Config</a>
+  <a href="03-components.html">Componentes</a>
+  <a href="04-views.html">Vistas</a>
+  <a href="05-router.html" class="active">Router</a>
+  <a href="06-main.html">Main</a>
+</nav>
+
+<div class="shell">
+  <aside class="sidebar">
+    <div class="sidebar-label">Secciones</div>
+    <nav class="sidebar-nav">
+      <a href="01-model.html">① Modelo de datos</a>
+      <a href="02-theme.html">② Tema visual</a>
+      <a href="03-components.html">③ Componentes</a>
+      <a href="04-views.html">④ Vistas</a>
+      <a href="05-router.html" class="active">⑤ Router</a>
+      <a href="06-main.html">⑥ Main</a>
+    </nav>
+    <div class="sidebar-toc">
+      <div class="sidebar-toc-label">En esta página</div>
+      <a href="#s-nav"     class="toc-link">Navegación en Flet</a>
+      <a href="#s-index"   class="toc-link">_MOVIE_INDEX</a>
+      <a href="#s-navigate" class="toc-link">navigate_to()</a>
+      <a href="#s-views"   class="toc-link">Constructoras de Views</a>
+      <a href="#s-setup"   class="toc-link">setup_router()</a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="breadcrumb"><a href="index.html">Inicio</a><span>›</span>⑤ Router</div>
+
+    <div class="page-header">
+      <div class="step">⑤ enrutador · router.py</div>
+      <h1>Router</h1>
+      <p>El cerebro de la navegación. Controla qué pantalla se muestra y gestiona el historial. Es el archivo que conecta todas las vistas.</p>
+    </div>
+
+    <div class="section" id="s-nav">
+      <h2>Cómo funciona la navegación en Flet</h2>
+      <p>Flet no usa URLs reales como un navegador. En su lugar, mantiene una <strong>pila de Views</strong>. Piensa en ella como una pila de cartas: la carta de arriba es lo que el usuario ve. Cuando navegas hacia adelante, se añade una carta encima. Cuando pulsas atrás, se elimina la carta de arriba.</p>
+      <div class="code-block">
+        <div class="cb-header"><span>cómo funciona la pila de Views</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><span class="cm"># En la pantalla de inicio:</span>
+page.views = [profile_view]    <span class="cm"># el usuario ve profile</span>
+
+<span class="cm"># Al ir al home:</span>
+page.views = [profile_view, home_view]    <span class="cm"># el usuario ve home</span>
+
+<span class="cm"># Al ver un detalle:</span>
+page.views = [profile_view, home_view, detail_view]    <span class="cm"># el usuario ve detail</span>
+
+<span class="cm"># Al pulsar atrás:</span>
+page.views.pop()    <span class="cm"># elimina detail → el usuario ve home</span></pre>
+      </div>
+      <p>La base siempre es <code>profile_view</code>. Aunque el usuario nunca vuelva a ella haciendo clic, sigue estando en la pila por si pulsa el botón físico de atrás varias veces.</p>
+    </div>
+
+    <div class="section" id="s-index">
+      <h2>El índice de películas — _MOVIE_INDEX</h2>
+      <div class="code-block">
+        <div class="cb-header"><span>router.py — índice de películas</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre>_MOVIE_INDEX: <span class="py">dict</span>[<span class="py">str</span>, Movie] = {m.show_id: m <span class="kw">for</span> m <span class="kw">in</span> <span class="fn">load_movies</span>()}</pre>
+      </div>
+      <p>Un diccionario que mapea <code>show_id → Movie</code>. Se construye una sola vez al importar el módulo, con una dict comprehension (igual que list comprehension pero crea un diccionario).</p>
+      <p>Cuando la ruta es <code>/detail/s123</code>, se extrae <code>s123</code> y se hace <code>_MOVIE_INDEX.get("s123")</code>. Buscar en un diccionario es instantáneo independientemente de cuántas películas haya — mucho más eficiente que recorrer una lista entera.</p>
+    </div>
+
+    <div class="section" id="s-navigate">
+      <h2>navigate_to() — la función clave</h2>
+      <div class="code-block">
+        <div class="cb-header"><span>router.py — navigate_to()</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><span class="kw">def</span> <span class="fn">navigate_to</span>(page: ft.Page, route: <span class="py">str</span>) -> <span class="kw">None</span>:
+    page.views.<span class="fn">clear</span>()                     <span class="cm"># borra toda la pila</span>
+    page.views.<span class="fn">append</span>(<span class="fn">_view_profiles</span>(page))  <span class="cm"># siempre la base</span>
+
+    <span class="kw">if</span> route == <span class="st">"/home"</span>:
+        page.views.<span class="fn">append</span>(<span class="fn">_view_home</span>(page))
+
+    <span class="kw">elif</span> route.<span class="fn">startswith</span>(<span class="st">"/detail/"</span>):
+        show_id = route.<span class="fn">split</span>(<span class="st">"/detail/"</span>, <span class="nu">1</span>)[-<span class="nu">1</span>]   <span class="cm"># extrae "s123"</span>
+        page.views.<span class="fn">append</span>(<span class="fn">_view_home</span>(page))
+        page.views.<span class="fn">append</span>(<span class="fn">_view_detail</span>(page, show_id))
+
+    page.<span class="fn">update</span>()   <span class="cm"># redibuja</span></pre>
+      </div>
+
+      <h3>¿Por qué limpiar y reconstruir en vez de solo añadir?</h3>
+      <p>Si solo añadieras, la pila crecería infinitamente al navegar entre pantallas. Limpiar y reconstruir garantiza que la pila siempre tiene exactamente la profundidad correcta para la ruta actual.</p>
+
+      <h3>Extraer el show_id de la ruta</h3>
+      <p><code>route.split("/detail/", 1)</code> parte la cadena <code>"/detail/s123"</code> en máximo 2 partes: <code>["", "s123"]</code>. El <code>[-1]</code> coge el último elemento, que es el ID. El <code>1</code> limita los cortes para no romper IDs que pudieran contener el texto "/detail/".</p>
+    </div>
+
+    <div class="section" id="s-views">
+      <h2>Las funciones constructoras de Views</h2>
+      <p>Cada pantalla se envuelve en un <code>ft.View</code>, que es la unidad de pantalla de Flet. Aquí se define la ruta, el color de fondo y, opcionalmente, la AppBar.</p>
+      <div class="code-block">
+        <div class="cb-header"><span>router.py — _view_home()</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><span class="kw">def</span> <span class="fn">_view_home</span>(page: ft.Page) -> ft.View:
+    <span class="kw">return</span> ft.<span class="fn">View</span>(
+        route=<span class="st">"/home"</span>,
+        bgcolor=COLOR_BG,
+        appbar=ft.<span class="fn">AppBar</span>(
+            title=ft.<span class="fn">Text</span>(<span class="st">"NOTFLIX"</span>, color=<span class="st">"#E50914"</span>, weight=ft.FontWeight.BOLD),
+            bgcolor=<span class="st">"#0a0a0a"</span>,
+            automatically_imply_leading=<span class="kw">False</span>,  <span class="cm"># sin botón atrás automático</span>
+        ),
+        controls=[
+            ft.<span class="fn">Container</span>(
+                expand=<span class="kw">True</span>,
+                padding=ft.<span class="fn">Padding</span>(<span class="nu">16</span>, <span class="nu">0</span>, <span class="nu">16</span>, <span class="nu">16</span>),
+                content=ft.<span class="fn">SafeArea</span>(expand=<span class="kw">True</span>, content=<span class="fn">build_home_view</span>(page)),
+            )
+        ],
+    )</pre>
+      </div>
+      <p><code>automatically_imply_leading=False</code> desactiva el botón de flecha atrás que Flet pondría automáticamente en el AppBar cuando hay más de una view en la pila. En el home no se quiere ese botón.</p>
+      <p><code>ft.SafeArea</code> añade padding automático para evitar que el contenido quede tapado por notches, cámaras o barras del sistema en móvil.</p>
+    </div>
+
+    <div class="section" id="s-setup">
+      <h2>setup_router() — el arranque</h2>
+      <div class="code-block">
+        <div class="cb-header"><span>router.py — setup_router()</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><span class="kw">def</span> <span class="fn">setup_router</span>(page: ft.Page) -> <span class="kw">None</span>:
+    <span class="kw">def</span> <span class="fn">view_pop</span>(e: ft.ViewPopEvent) -> <span class="kw">None</span>:
+        <span class="kw">if</span> <span class="fn">len</span>(page.views) > <span class="nu">1</span>:
+            page.views.<span class="fn">pop</span>()   <span class="cm"># elimina la última view</span>
+            page.<span class="fn">update</span>()
+
+    page.on_view_pop = view_pop    <span class="cm"># botón físico de atrás</span>
+    <span class="fn">navigate_to</span>(page, <span class="st">"/"</span>)         <span class="cm"># pantalla inicial</span></pre>
+      </div>
+      <p><code>page.on_view_pop</code> es el evento que Flet dispara cuando el usuario pulsa el botón físico de atrás (en Android) o el gesto de atrás. La función <code>view_pop</code> elimina la última view de la pila. El <code>len > 1</code> evita eliminar la view base y quedarse con una pila vacía.</p>
+      <p>Esta función se llama una sola vez desde <code>main.py</code> al arrancar la app.</p>
+    </div>
+
+    <div class="page-nav">
+      <a href="04-views.html"><div><span class="nav-label">← Anterior</span><span class="nav-title">Vistas</span></div></a>
+      <a href="06-main.html"><div><span class="nav-label">Siguiente →</span><span class="nav-title">main.py</span></div></a>
+    </div>
+  </main>
+</div>
+
+<script>
+function copyCode(btn) {
+  const pre = btn.closest('.code-block').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(() => {
+    btn.textContent = '✓ Copiado'; btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copiar'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+(function () {
+  const links = document.querySelectorAll('.toc-link');
+  const sections = [...links].map(l => document.querySelector(l.getAttribute('href')));
+  function activate() {
+    let current = sections[0];
+    sections.forEach(s => { if (s && window.scrollY >= s.offsetTop - 84) current = s; });
+    links.forEach(l => l.classList.toggle('toc-active', l.getAttribute('href') === '#' + (current && current.id)));
+  }
+  window.addEventListener('scroll', activate, { passive: true }); activate();
+})();
+</script>
+</body>
+</html>

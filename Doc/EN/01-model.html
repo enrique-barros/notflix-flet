@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>movie_model.py — Notflix Docs</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <a href="index.html" class="brand">NOT<em>FLIX</em></a>
+  <a href="01-model.html" class="active">Data</a>
+  <a href="02-theme.html">Config</a>
+  <a href="03-components.html">Components</a>
+  <a href="04-views.html">Views</a>
+  <a href="05-router.html">Router</a>
+  <a href="06-main.html">Main</a>
+</nav>
+
+<div class="shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-label">Sections</div>
+    <nav class="sidebar-nav">
+      <a href="01-model.html" class="active">① Data model</a>
+      <a href="02-theme.html">② Visual theme</a>
+      <a href="03-components.html">③ Components</a>
+      <a href="04-views.html">④ Views</a>
+      <a href="05-router.html">⑤ Router</a>
+      <a href="06-main.html">⑥ Main</a>
+    </nav>
+
+    <div class="sidebar-toc">
+      <div class="sidebar-toc-label">On this page</div>
+      <a href="#s-why"    class="toc-link">Why it exists</a>
+      <a href="#s-csv"    class="toc-link">The CSV</a>
+      <a href="#s-class"  class="toc-link">Movie class</a>
+      <a href="#s-load"   class="toc-link">load_movies()</a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="breadcrumb"><a href="index.html">Home</a><span>›</span>① Data</div>
+
+    <div class="page-header">
+      <div class="step">① data · data/movie_model.py</div>
+      <h1>Data model</h1>
+      <p>Defines how a Netflix title is represented inside the program and loads all data from the CSV. It's the foundation of the entire app — without this, there's nothing to show.</p>
+    </div>
+
+    <!-- WHY IT EXISTS -->
+    <div class="section" id="s-why">
+      <h2>Why this file exists</h2>
+      <p>The app needs to work with movie data. That data comes from a CSV with thousands of rows. This file does two things: it defines what a movie looks like inside the program (the <code>Movie</code> class), and provides the function that reads the CSV and converts each row into a <code>Movie</code> object.</p>
+      <p>It's the only file that touches the disk. Everything else works with lists of <code>Movie</code> objects that this file has created. That's separation of concerns.</p>
+    </div>
+
+    <!-- THE CSV -->
+    <div class="section" id="s-csv">
+      <h2>The CSV file</h2>
+      <p>A CSV is a text file where each line is a row and the values are separated by commas. The <code>netflix_titles.csv</code> file has a header with column names followed by one row per title:</p>
+      <div class="code-block">
+        <div class="cb-header">
+          <span>netflix_titles.csv (excerpt)</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre>show_id,type,title,director,cast,country,date_added,...
+s1,Movie,Dick Johnson Is Dead,Kirsten Johnson,,United States,...
+s2,TV Show,Blood & Water,,Ama Qamata,...,South Africa,...</pre>
+      </div>
+      <p>Python can read this with <code>csv.DictReader</code>, which converts each row into a dictionary where the keys are column names. Much more convenient than working with numeric indices.</p>
+    </div>
+
+    <!-- DATACLASS -->
+    <div class="section" id="s-class">
+      <h2>The Movie class — @dataclass</h2>
+      <p>A <code>dataclass</code> is a way to create classes that only store data, without having to write the <code>__init__</code> method by hand. Python generates it automatically.</p>
+
+      <div class="code-block">
+        <div class="cb-header">
+          <span>movie_model.py — Movie class</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><span class="kw">from</span> dataclasses <span class="kw">import</span> dataclass
+
+<span class="kw">@dataclass</span>
+<span class="kw">class</span> <span class="fn">Movie</span>:
+    show_id: <span class="py">str</span>       <span class="cm"># unique identifier, e.g. "s1"</span>
+    type: <span class="py">str</span>          <span class="cm"># "Movie" or "TV Show"</span>
+    title: <span class="py">str</span>
+    director: <span class="py">str</span>
+    cast: <span class="py">str</span>          <span class="cm"># comma-separated actors</span>
+    country: <span class="py">str</span>
+    date_added: <span class="py">str</span>
+    release_year: <span class="py">str</span>
+    rating: <span class="py">str</span>        <span class="cm"># "PG-13", "TV-MA"…</span>
+    duration: <span class="py">str</span>       <span class="cm"># "90 min" or "2 Seasons"</span>
+    listed_in: <span class="py">str</span>     <span class="cm"># comma-separated genres</span>
+    description: <span class="py">str</span>
+
+    <span class="kw">@property</span>
+    <span class="kw">def</span> <span class="fn">genres</span>(<span class="py">self</span>) -> <span class="py">list</span>[<span class="py">str</span>]:
+        <span class="cm"># "Drama, Comedy, Action" → ["Drama", "Comedy", "Action"]</span>
+        <span class="kw">return</span> [g.strip() <span class="kw">for</span> g <span class="kw">in</span> self.listed_in.split(<span class="st">","</span>) <span class="kw">if</span> g.strip()]</pre>
+      </div>
+
+      <h3>What is @property?</h3>
+      <p><code>genres</code> is a computed property: it isn't stored in the object, it's calculated each time it's accessed. The CSV has <code>listed_in = "Drama, Comedy"</code> as a string. The property splits that string by comma and returns a clean list. It's used as <code>movie.genres</code>, without parentheses, just like a normal attribute.</p>
+
+      <div class="callout"><strong>Key point:</strong> <code>.strip()</code> removes whitespace from each genre. Without this, "Drama" and " Drama" would be treated as different genres.</div>
+    </div>
+
+    <!-- LOAD_MOVIES -->
+    <div class="section" id="s-load">
+      <h2>The load_movies() function</h2>
+      <p>Reads the full CSV and returns a list of all valid <code>Movie</code> objects.</p>
+
+      <div class="code-block">
+        <div class="cb-header">
+          <span>movie_model.py — load_movies()</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><span class="kw">from</span> pathlib <span class="kw">import</span> Path
+<span class="kw">import</span> csv
+
+DATA_PATH = Path(__file__).parent.parent / <span class="st">"data"</span> / <span class="st">"netflix_titles.csv"</span>
+
+<span class="kw">def</span> <span class="fn">load_movies</span>(path: Path = DATA_PATH) -> <span class="py">list</span>[Movie]:
+    movies: <span class="py">list</span>[Movie] = []
+
+    <span class="kw">with</span> <span class="fn">open</span>(path, encoding=<span class="st">"utf-8"</span>) <span class="kw">as</span> f:
+        reader = csv.<span class="fn">DictReader</span>(f)
+
+        <span class="kw">for</span> row <span class="kw">in</span> reader:
+            title = row.<span class="fn">get</span>(<span class="st">"title"</span>, <span class="st">""</span>).<span class="fn">strip</span>()
+            type_ = row.<span class="fn">get</span>(<span class="st">"type"</span>, <span class="st">""</span>).<span class="fn">strip</span>()
+
+            <span class="kw">if not</span> title <span class="kw">or not</span> type_:
+                <span class="kw">continue</span>        <span class="cm"># skip incomplete rows</span>
+
+            movies.<span class="fn">append</span>(Movie(
+                show_id=row.<span class="fn">get</span>(<span class="st">"show_id"</span>, <span class="st">""</span>),
+                type=type_,
+                title=title,
+                <span class="cm"># … rest of fields</span>
+            ))
+
+    <span class="kw">return</span> movies</pre>
+      </div>
+
+      <h3>What is DATA_PATH?</h3>
+      <p><code>Path(__file__)</code> is the path of the current file (<code>movie_model.py</code>). <code>.parent.parent</code> goes up two folders to the project root. Then <code>"data/netflix_titles.csv"</code> is appended. This way the path works regardless of where you run the app from.</p>
+
+      <h3>Why use .get() instead of row["key"]?</h3>
+      <p>If the key doesn't exist in the dictionary, <code>row["key"]</code> raises an error. <code>row.get("key", "")</code> returns an empty string if it doesn't exist. Since the CSV may have rows with empty fields, this prevents the app from crashing on dirty data.</p>
+
+      <h3>Why skip rows without a title or type?</h3>
+      <p>Some CSVs have empty or corrupted rows at the end. If <code>title</code> or <code>type</code> are empty, that <code>Movie</code> object would be useless to the app. <code>continue</code> skips that iteration and moves to the next row.</p>
+    </div>
+
+    <div class="page-nav">
+      <div></div>
+      <a href="02-theme.html">
+        <div>
+          <span class="nav-label">Next →</span>
+          <span class="nav-title">theme.py</span>
+        </div>
+      </a>
+    </div>
+
+  </main>
+</div>
+
+<script>
+/* ── Copy button ── */
+function copyCode(btn) {
+  const pre = btn.closest('.code-block').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(() => {
+    btn.textContent = '✓ Copied';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+/* ── TOC scroll spy ── */
+(function () {
+  const links = document.querySelectorAll('.toc-link');
+  const sections = [...links].map(l => document.querySelector(l.getAttribute('href')));
+
+  function activate() {
+    const navH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-h')) || 52;
+    let current = sections[0];
+    sections.forEach(s => { if (s && window.scrollY >= s.offsetTop - navH - 32) current = s; });
+    links.forEach(l => {
+      l.classList.toggle('toc-active', l.getAttribute('href') === '#' + (current && current.id));
+    });
+  }
+
+  window.addEventListener('scroll', activate, { passive: true });
+  activate();
+})();
+</script>
+
+</body>
+</html>

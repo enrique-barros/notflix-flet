@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>main.py — Notflix Docs</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <a href="index.html" class="brand">NOT<em>FLIX</em></a>
+  <a href="01-model.html">Datos</a>
+  <a href="02-theme.html">Config</a>
+  <a href="03-components.html">Componentes</a>
+  <a href="04-views.html">Vistas</a>
+  <a href="05-router.html">Router</a>
+  <a href="06-main.html" class="active">Main</a>
+</nav>
+
+<div class="shell">
+  <aside class="sidebar">
+    <div class="sidebar-label">Secciones</div>
+    <nav class="sidebar-nav">
+      <a href="01-model.html">① Modelo de datos</a>
+      <a href="02-theme.html">② Tema visual</a>
+      <a href="03-components.html">③ Componentes</a>
+      <a href="04-views.html">④ Vistas</a>
+      <a href="05-router.html">⑤ Router</a>
+      <a href="06-main.html" class="active">⑥ Main</a>
+    </nav>
+    <div class="sidebar-toc">
+      <div class="sidebar-toc-label">En esta página</div>
+      <a href="#s-code"   class="toc-link">El código</a>
+      <a href="#s-how"    class="toc-link">Cómo arranca Flet</a>
+      <a href="#s-flow"   class="toc-link">Flujo de arranque</a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="breadcrumb"><a href="index.html">Inicio</a><span>›</span>⑥ Main</div>
+
+    <div class="page-header">
+      <div class="step">⑥ entrada · main.py</div>
+      <h1>main.py</h1>
+      <p>El punto de arranque de la aplicación. Es el primer archivo que ejecuta Python y el único que llama a <code>ft.run()</code>.</p>
+    </div>
+
+    <div class="section" id="s-code">
+      <h2>El código completo</h2>
+      <div class="code-block">
+        <div class="cb-header"><span>main.py</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><span class="kw">import</span> flet <span class="kw">as</span> ft
+<span class="kw">from</span> config.theme <span class="kw">import</span> COLOR_BG
+<span class="kw">from</span> router <span class="kw">import</span> setup_router
+
+
+<span class="kw">def</span> <span class="fn">main</span>(page: ft.Page) -> <span class="kw">None</span>:
+    page.title = <span class="st">"Notflix"</span>
+    page.padding = <span class="nu">0</span>
+    page.bgcolor = COLOR_BG
+    page.horizontal_alignment = ft.CrossAxisAlignment.STRETCH
+    <span class="fn">setup_router</span>(page)
+
+
+<span class="kw">if</span> __name__ == <span class="st">"__main__"</span>:
+    ft.<span class="fn">run</span>(main)</pre>
+      </div>
+    </div>
+
+    <div class="section" id="s-how">
+      <h2>¿Cómo arranca Flet?</h2>
+      <p><code>ft.run(main)</code> lanza el motor de Flet. Flet crea la ventana, inicializa el entorno gráfico y llama a la función <code>main</code> pasándole un objeto <code>page</code>. Ese objeto representa la ventana completa de la app y es el que se pasa de función en función por todo el proyecto.</p>
+
+      <h3>La función main(page)</h3>
+      <p>Recibe el objeto <code>page</code> de Flet y configura las propiedades globales de la ventana antes de que aparezca nada en pantalla:</p>
+
+      <table class="info-table">
+        <thead><tr><th>Propiedad</th><th>Valor</th><th>Qué hace</th></tr></thead>
+        <tbody>
+          <tr><td>page.title</td><td>"Notflix"</td><td>Título de la ventana del sistema operativo</td></tr>
+          <tr><td>page.padding</td><td>0</td><td>Elimina el margen por defecto para ocupar toda la pantalla</td></tr>
+          <tr><td>page.bgcolor</td><td>COLOR_BG</td><td>Color de fondo global (#141414)</td></tr>
+          <tr><td>page.horizontal_alignment</td><td>STRETCH</td><td>Los hijos se estiran para ocupar todo el ancho</td></tr>
+        </tbody>
+      </table>
+
+      <h3>if __name__ == "__main__"</h3>
+      <p>Esta condición es un estándar de Python. El intérprete asigna la variable <code>__name__</code> al valor <code>"__main__"</code> solo cuando el archivo se ejecuta directamente (ej: <code>python main.py</code>). Si otro archivo importa <code>main.py</code>, <code>__name__</code> valdría <code>"main"</code> y <code>ft.run()</code> no se ejecutaría. Así se evita que la app arranque por accidente al ser importada.</p>
+    </div>
+
+    <div class="section" id="s-flow">
+      <h2>Flujo completo de arranque</h2>
+      <div class="flow">
+        <div class="flow-step">
+          <div class="flow-line"><div class="flow-dot"></div><div class="flow-connector"></div></div>
+          <div class="flow-content">
+            <strong>python main.py</strong>
+            <p>Python ejecuta el archivo. La condición <code>__name__ == "__main__"</code> es verdadera.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-line"><div class="flow-dot"></div><div class="flow-connector"></div></div>
+          <div class="flow-content">
+            <strong>ft.run(main)</strong>
+            <p>Flet crea la ventana y llama a <code>main(page)</code> con el objeto página.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-line"><div class="flow-dot"></div><div class="flow-connector"></div></div>
+          <div class="flow-content">
+            <strong>Configuración de la página</strong>
+            <p>Se aplican título, fondo, padding y alineación.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-line"><div class="flow-dot"></div><div class="flow-connector"></div></div>
+          <div class="flow-content">
+            <strong>setup_router(page)</strong>
+            <p>El router toma el control, registra el handler de atrás y muestra la pantalla de perfiles.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-line"><div class="flow-dot"></div></div>
+          <div class="flow-content">
+            <strong>La app está viva</strong>
+            <p>Flet entra en el bucle de eventos y espera interacción del usuario.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-nav">
+      <a href="05-router.html"><div><span class="nav-label">← Anterior</span><span class="nav-title">router.py</span></div></a>
+      <a href="index.html"><div><span class="nav-label">Volver al</span><span class="nav-title">Inicio</span></div></a>
+    </div>
+  </main>
+</div>
+
+<script>
+function copyCode(btn) {
+  const pre = btn.closest('.code-block').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(() => {
+    btn.textContent = '✓ Copiado'; btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copiar'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+(function () {
+  const links = document.querySelectorAll('.toc-link');
+  const sections = [...links].map(l => document.querySelector(l.getAttribute('href')));
+  function activate() {
+    let current = sections[0];
+    sections.forEach(s => { if (s && window.scrollY >= s.offsetTop - 84) current = s; });
+    links.forEach(l => l.classList.toggle('toc-active', l.getAttribute('href') === '#' + (current && current.id)));
+  }
+  window.addEventListener('scroll', activate, { passive: true }); activate();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notflix — Docs</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <a href="index.html" class="brand">NOT<em>FLIX</em></a>
+  <a href="01-model.html">Datos</a>
+  <a href="02-theme.html">Config</a>
+  <a href="03-components.html">Componentes</a>
+  <a href="04-views.html">Vistas</a>
+  <a href="05-router.html">Router</a>
+  <a href="06-main.html">Main</a>
+</nav>
+
+<div class="shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-label">Secciones</div>
+    <nav class="sidebar-nav">
+      <a href="01-model.html">① Modelo de datos</a>
+      <a href="02-theme.html">② Tema visual</a>
+      <a href="03-components.html">③ Componentes</a>
+      <a href="04-views.html">④ Vistas</a>
+      <a href="05-router.html">⑤ Router</a>
+      <a href="06-main.html">⑥ Main</a>
+    </nav>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <div class="hero">
+      <div class="label">Documentación técnica · Notflix</div>
+      <h1>Guía del<br><span>código</span></h1>
+      <p>Todo lo que necesitas explicar en el vídeo. Cada archivo desglosado con su código y su lógica, en el orden correcto.</p>
+    </div>
+
+    <div class="cards">
+      <a href="01-model.html" class="card" style="--accent: var(--teal)">
+        <div class="step">① datos</div>
+        <h2>Modelo de datos</h2>
+        <div class="files">movie_model.py</div>
+        <p>La clase Movie, cómo se lee el CSV y por qué es la base de todo.</p>
+        <span class="arrow">→</span>
+      </a>
+      <a href="02-theme.html" class="card" style="--accent: #888">
+        <div class="step">② config</div>
+        <h2>Tema visual</h2>
+        <div class="files">theme.py</div>
+        <p>Colores, tipografía y espaciado globales. Por qué centralizar los estilos.</p>
+        <span class="arrow">→</span>
+      </a>
+      <a href="03-components.html" class="card" style="--accent: var(--purple)">
+        <div class="step">③ componentes</div>
+        <h2>Componentes</h2>
+        <div class="files">movie_card.py<br>hero_banner.py<br>logo.py</div>
+        <p>Piezas visuales reutilizables. Gradientes, Stack, callbacks.</p>
+        <span class="arrow">→</span>
+      </a>
+      <a href="04-views.html" class="card" style="--accent: var(--coral)">
+        <div class="step">④ vistas</div>
+        <h2>Vistas</h2>
+        <div class="files">profile_view.py<br>home_view.py<br>detail_view.py</div>
+        <p>Las tres pantallas completas de la app y cómo gestionan el estado.</p>
+        <span class="arrow">→</span>
+      </a>
+      <a href="05-router.html" class="card" style="--accent: var(--amber)">
+        <div class="step">⑤ enrutador</div>
+        <h2>Router</h2>
+        <div class="files">router.py</div>
+        <p>La pila de Views de Flet, navigate_to() y la navegación sin URLs.</p>
+        <span class="arrow">→</span>
+      </a>
+      <a href="06-main.html" class="card" style="--accent: var(--blue)">
+        <div class="step">⑥ entrada</div>
+        <h2>Main</h2>
+        <div class="files">main.py</div>
+        <p>El punto de arranque. ft.run(), la función main y cómo Flet inicia todo.</p>
+        <span class="arrow">→</span>
+      </a>
+    </div>
+
+    <div class="arch">
+      <h2>Mapa de dependencias</h2>
+      <div class="arch-map">
+        <span class="b">main.py</span>            <span class="arr">→</span> llama a setup_router()<br>
+        <span class="a">router.py</span>          <span class="arr">→</span> construye ft.View con cada vista<br>
+        <span class="c">views/</span>             <span class="arr">→</span> usan componentes + datos + theme<br>
+        <span class="p">components/</span>        <span class="arr">→</span> usan datos + theme<br>
+        <span class="t">data/movie_model.py</span> <span class="arr">→</span> solo librería estándar<br>
+        <span class="g">config/theme.py</span>    <span class="arr">→</span> solo flet
+      </div>
+    </div>
+
+  </main>
+</div>
+
+</body>
+</html>
